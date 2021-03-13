@@ -24,7 +24,9 @@ from django.conf.urls import url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index,name="index"),
-    path('accounts/', include('allauth.urls')),,
+    path('login/',login,name="login"),
+    path('elogin/',elogin,name="elogin"),
+    path('register/',signup,name="signup"),
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]

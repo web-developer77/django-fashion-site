@@ -39,11 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'crispy_forms',
-    'allauth', 
-    'allauth.account', 
-    'allauth.socialaccount', 
-    #'allauth.socialaccount.providers.google', 
-    #'allauth.socialaccount.providers.facebook',
     'kowiapp',
 ]
 
@@ -152,6 +147,3 @@ LOGIN_REDIRECT_URL = "/"
 #ADMINS = (('Suvana', 'sales1@suvana.co.in'),('Admin', 'admin@suvana.co.in'),('info', 'info@suvana.co.in'),('Sales', 'sales@suvana.co.in')) #admin email addresses
 SITE_ID=2
 #SERVER_EMAIL = 'purchase@suvana.co.in'
-
-
-ACCOUNT_FORMS = {'signup': 'kowiapp.forms.CustomerSignupForm','signup':'kowiapp.forms.EmployeeSignupForm'}

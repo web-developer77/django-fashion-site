@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+</head>
+<body>
+    <form action="" method="post">
+        {%csrf_token%}
+        <input type="text" name="username" value="Username">
+        <input type="password" name="password1" value="Password">
+        <input type="password" name="password2" value="Password1">
+        <input type="email" name="email" value="Email">
+        <select name="gender" id="">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Prefer Not to Say</option>
+        </select>
+        <input type="text" name="height" value="Height">
+        <input type="text" name="weight" value="Weight">
+        <select name="haircolors" id="">
+            <option value="black">Black</option>
+            <option value="brown">Brown</option>
+            <option value="Blond">Blonde</option>
+            <option value="Red">Red</option>
+            <option value="White/Gray">White/Gray</option>
+        </select>
+        <select name="skintone" id="">
+            <option value="1">Fair</option>
+            <option value="2">Olive</option>
+            <option value="3">Brown</option>
+            <option value="4">Black</option>
+        </select>
+        <input type="number" name="mobno" value="Mobile Number">
+        <input type="number" name="age" value="Age">
+        <input type="submit" value="submit">
+    </form>
+</body>
+</html>
