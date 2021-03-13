@@ -7,6 +7,15 @@
     <title>{{title}}</title>
 </head>
 <body>
+    <div>
+        {% if messages %}
+        {% for message in messages %}
+          <script>M.toast({html: "{{message}}", classes: 'blue rounded', displayLength:2000});</script>
+        {% endfor %}
+        {%else%}
+        <p>No messages</p>
+        {% endif %}
+    </div>
     <form action="" method="post">
         {%csrf_token%}
         <input type="text" name="username" id="">

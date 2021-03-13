@@ -18,23 +18,10 @@
     </div>
     <form action="" method="post">
         {%csrf_token%}
-        <input type="text" name="username" value="Username">
-        <input type="password" name="password1" value="Password">
-        <input type="password" name="password2" value="Password1">
-        <input type="email" name="email" value="Email">
         <select name="gender" id="">
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Prefer not to say">Prefer Not to Say</option>
-        </select>
-        <input type="text" name="height" value="Height">
-        <input type="text" name="weight" value="Weight">
-        <select name="haircolors" id="">
-            <option value="black">Black</option>
-            <option value="brown">Brown</option>
-            <option value="Blond">Blonde</option>
-            <option value="Red">Red</option>
-            <option value="White/Gray">White/Gray</option>
         </select>
         <select name="skintone" id="">
             <option value="Fair">Fair</option>
@@ -42,9 +29,18 @@
             <option value="Brown">Brown</option>
             <option value="Black">Black</option>
         </select>
-        <input type="number" name="mobno" value="Mobile Number">
-        <input type="number" name="age" value="Age">
-        <input type="submit" value="submit">
+        <input type="text" name="height" id="" placeholder="Enter Height">
+        <input type="text" name="weight" id="" placeholder="Enter Weight">
+        <select name="haircolors" id="">
+            <option value="black">Black</option>
+            <option value="brown">Brown</option>
+            <option value="Blond">Blonde</option>
+            <option value="Red">Red</option>
+            <option value="White/Gray">White/Gray</option>
+        </select>
+        <input type="number" name="mobno" id="" placeholder="Enter Mobile Number">
+        <input type="number" name="age" id="" placeholder="Enter Age">
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>

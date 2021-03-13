@@ -5,13 +5,82 @@ from .models import *
 def index(request):
     return render(request, 'index.html', {'title':'index'})
 
-#dashboardofuser
-#dashboardofemployee
-#admin redesign
 
 #logout
 #reset pass
 #index - feedback
+def edashboard(request):
+    title = "KOWI Fashions | Employee Dashboard"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            return render(request,'edashboard.html',{'title':title,'employee':employee})
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    return render(request,'edashboard.html',{'title':title})
+
+def eupdate(request):
+    title = "KOWI Fashions | Employee Update"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        if request.method == 'POST':
+            gender = request.POST['gender']
+            mobno = request.POST['mobno']
+            age = request.POST['age']
+            EmployeeInfo(id=user.id,gender=gender,mobno=mobno,age=age).save()
+            return redirect('edashboard')
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    return render(request,'eupdate.html',{'title':title})
+
+def update(request):
+    title = "KOWI Fashions | Profile Update"
+    user = request.user
+    if user.is_authenticated and user.is_staff == False:
+        if request.method == 'POST':
+            gender = request.POST['gender']
+            height = request.POST['height']
+            weight = request.POST['weight']
+            skintone = request.POST['skintone']
+            haircolors = request.POST['haircolors']
+            mobno = request.POST['mobno']
+            age = request.POST['age']
+            CustInfo(id=user.id,gender=gender,skintone=skintone,height=height,weight=weight,haircolors=haircolors,mobno=mobno,age=age).save()
+            return redirect('dashboard')
+    else:
+        messages.error(request,'Login First')
+        return redirect('login')
+    return render(request,'update.html',{'title':title})
+
+def dashboard(request):
+    title = "KOWI Fashions | User Dashboard"
+    user = request.user
+    if user.is_authenticated and user.is_staff == False:
+        try:
+            customer = CustInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            return render(request,'dashboard.html',{'title':title,'customer':customer})
+        elif flag == 1:
+            messages.error(request,'Complete Profile First!')
+            return redirect(update)
+    else:
+        messages.error(request,'Login First')
+        return redirect('login')
+    return render(request,'dashboard.html',{'title':title}) 
+
 
 def signup(request):
     title = "Register with KOWI Fashions"
@@ -36,8 +105,11 @@ def signup(request):
                 return redirect('signup')
             else:
                 user = User.objects.create_user(username=username,password=password1,email=email).save()
-                customer = CustInfo.objects.create(user=user,gender=gender,skintone=skintone,height=height,weight=weight,haircolors=haircolors,mobno=mobno,age=age)
-                messages.info(request,'User Created')
+                user = auth.authenticate(username=username,password=password1)
+                auth.login(request,user)
+                us = request.user
+                customer = CustInfo.objects.create(id=us.id,gender=gender,skintone=skintone,height=height,weight=weight,haircolors=haircolors,mobno=mobno,age=age)
+                messages.info(request,'Customer Created')
                 return redirect(index)
         else:
             messages.info(request,'Password not matched')
@@ -52,7 +124,8 @@ def login(request):
         user = auth.authenticate(username=username,password=password)
         if user is not None and user.is_staff == False:
             auth.login(request,user)
-            return redirect('/')
+            messages.info(request,'Logged In')
+            return redirect('dashboard')
         else:
             messages.info(request,'Invalid Credentials')
             return redirect('login')
@@ -68,7 +141,8 @@ def elogin(request):
         user = auth.authenticate(username=username,password=password)
         if user is not None and user.is_staff == True:
             auth.login(request,user)
-            return redirect('/')
+            messages.info(request,'Logged In')
+            return redirect('edashboard')
         else:
             messages.info(request,'Invalid Credentials')
             return redirect('login')

@@ -16,5 +16,16 @@
         <p>No messages</p>
         {% endif %}
     </div>
+    <form action="" method="post">
+        {%csrf_token%}
+        <select name="gender" id="">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Prefer not to say">Prefer Not to Say</option>
+        </select>
+        <input type="number" name="mobno" id="" placeholder="Enter Mobile Number">
+        <input type="number" name="age" id="" placeholder="Enter Age">
+        <input type="submit" value="submit">
+    </form>
 </body>
 </html>
