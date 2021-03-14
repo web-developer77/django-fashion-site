@@ -1,3 +1,5 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +9,7 @@
     <title>{{title}}</title>
 </head>
 <body>
-    <div>
+  <!--  <div>
         {% if messages %}
         {% for message in messages %}
           <script>M.toast({html: "{{message}}", classes: 'blue rounded', displayLength:2000});</script>
@@ -15,6 +17,59 @@
         {%else%}
         <p>No messages</p>
         {% endif %}
-    </div>
+    </div>-->
+    
+    <!-- Card -->
+
+
+
+</div>
+<!-- Card -->
+
+{% for item in trends %}
+<div class="col-lg-4 col-md-6" style="padding: 20px!important">
+        <div class="movie_col ">
+            <div class="card">
+                <img class="card-img-top" style="height: 15rem!important" src="{{item.image}}">
+                <div class="card-body">
+                    <h5 class="card-title">{{item.name}}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Brand: {{item.brand}}</li>
+                  <!--  <li class="list-group-item">Material: cotton</li>-->
+                   <!-- <li class="list-group-item">size: <a href="{{dict_item.album_url}}">XL</a> </li>-->
+                </ul>
+                <div class="card-body">
+                    <a href="{{item.url}}" target="_blank" class="card-link">Buy Now</a>
+                </div>
+            </div>
+        </div>
+        </div>
+        
+{% endfor %}
+
+{% if user.is_authenticated %}
+<form>
+  <div class="form-group">
+    <label for="exampleInputEmail1">Email address</label>
+    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+  </div>
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{%else%}
+<a class="btn" href="login">Login In</a>
+<a class="btn" href="signup">Sign Up</a>
+{%endif%}
+
+
 </body>
 </html>
