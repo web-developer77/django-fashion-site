@@ -132,30 +132,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTHENTICATION_BACKENDS = ( 
     'django.contrib.auth.backends.ModelBackend', 
-    'allauth.account.auth_backends.AuthenticationBackend', 
 )
-#ACCOUNT_EMAIL_REQUIRED = True
-#ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS=7
+
 LOGIN_REDIRECT_URL = "/"
 
-#EMAIL_USE_SSL = True
-#EMAIL_HOST = 'smtp.zoho.in' #zoho mail used
-#EMAIL_HOST_USER = 'purchase@suvana.co.in'
-#EMAIL_HOST_PASSWORD = '********' #enter password
-#EMAIL_PORT = 465
-#DEFAULT_FROM_EMAIL = '"purchase" <purchase@suvana.co.in>'
-#ADMINS = (('Suvana', 'sales1@suvana.co.in'),('Admin', 'admin@suvana.co.in'),('info', 'info@suvana.co.in'),('Sales', 'sales@suvana.co.in')) #admin email addresses
 SITE_ID=2
-#SERVER_EMAIL = 'purchase@suvana.co.in'
 
 #SMTP Configuration
-
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kowifashion1234@gmail.com'
 EMAIL_HOST_PASSWORD = 'kowi1234'
-
+DEFAULT_FROM_EMAIL = '"kowi fashion" <kowifashion1234@gmail.com>'
+SERVER_EMAIL = 'kowifashion1234@gmail.com'
+ADMINS = (('kowi fashion', 'kowifashion1234@gmail.com'))
 

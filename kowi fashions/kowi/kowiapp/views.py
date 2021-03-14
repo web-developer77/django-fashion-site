@@ -4,13 +4,26 @@ from django.contrib.auth.models import auth,User
 from django.contrib.auth import login,logout
 from django.contrib.auth.decorators import login_required 
 from .models import *
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMessage
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 def index(request):
-    return render(request, 'index.html', {'title':'index'})
+    trend = trends.objects.all()
+    user = request.user
+    if user.is_authenticated:
+        if request.method == 'POST':
+            feed = request.POST['feed']
+            feedback(userid=user.id,feed=feed).save()
+            messages.info(request,"Feedback Sent")
+    return render(request, 'index.html', {'title':'index','trend':trend,})
 
 
-#logout
-#reset pass
-#index - feedback
 def edashboard(request):
     title = "KOWI Fashions | Employee Dashboard"
     user = request.user
@@ -111,7 +124,22 @@ def signup(request):
                 auth.login(request,user)
                 us = request.user
                 customer = CustInfo.objects.create(id=us.id,gender=gender,skintone=skintone,height=height,weight=weight,haircolors=haircolors,mobno=mobno,age=age)
-                messages.info(request,'Customer Created')
+                us.is_active = False
+                us.save()
+                current_site = get_current_site(request)
+                mail_subject = 'Activate your account.'
+                message = render_to_string('registration/acc_active_email.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                })
+                to_email = email
+                email = EmailMessage(
+                    mail_subject, message, to=[to_email]
+                )
+                email.send()
+                messages.info(request,'Check email and Verify your account')
                 return redirect(index)
         else:
             messages.info(request,'Password not matched')
@@ -156,3 +184,16 @@ def elogin(request):
 def logoutuser(request):
     logout(request)
     return redirect('login')
+
+def activate(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+    else:
+        return HttpResponse('Activation link is invalid!')

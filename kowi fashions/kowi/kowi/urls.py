@@ -33,11 +33,8 @@ urlpatterns = [
     path('update/',update,name="update"),
     path('dashboard/',dashboard,name="dashboard"),
     path('edashboard/',edashboard,name="edashboard"),
-    path('resetpassword/',auth_views.PasswordResetView.as_view(),name="reset_password"),
-    path('resetpasswordsent/',auth_views.PasswordResetDoneView.as_view(),name="password_reset_done"),
-    path('reset/<uidb64/<token>/',auth_views.PasswordResetConfirmView.as_view(),name="password_reset_confirm"),
-    path('resetpasswordcomplete/',auth_views.PasswordResetCompleteView.as_view(),name="password_reset_complete"),
-
+    url('^', include('django.contrib.auth.urls')),
+    path('activate/<uidb64>/<token>/',activate, name='activate'),
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
@@ -50,8 +47,3 @@ admin.site.site_title = "Admin Area | KOWI Fashions"
 admin.site.index_title = "Admin Control | KOWI Fashions"
 
 
-
-#1.submit email form
-#2.Email sent success message
-#3.Link to password reset form in email
-#4.Password successfully changed message
