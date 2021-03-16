@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import Http404
 from django.contrib import messages
 from django.contrib.auth.models import auth,User
 from django.contrib.auth import login,logout
@@ -12,16 +13,37 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.files.storage import FileSystemStorage
+from django.core.exceptions import ObjectDoesNotExist
+import datetime
 def index(request):
     trend = trends.objects.all()
     user = request.user
+    TopAuthors =Author.objects.order_by('-rate')[:4]
+    AuthorsPost = [Post.objects.filter(auther = author).first() for author in TopAuthors]
+    all_post = Paginator(Post.objects.filter(publish = True),3)
+    page = request.GET.get('page')
+    try:
+        posts = all_post.page(page)
+    except PageNotAnInteger:
+        posts = all_post.page(1)
+    except EmptyPage:
+        posts = all_post.page(all_post.num_pages)
+
     if user.is_authenticated:
         if request.method == 'POST':
             feed = request.POST['feed']
             feedback(userid=user.id,feed=feed).save()
             messages.info(request,"Feedback Sent")
-    return render(request, 'index.html', {'title':'index','trend':trend,})
+
+    parms = {
+		'posts': posts,
+        'author_post':AuthorsPost,
+        'title':'index',
+        'trend':trend,
+	}
+    return render(request, 'index.html', parms)
 
 
 def edashboard(request):
@@ -30,12 +52,8 @@ def edashboard(request):
     if user.is_authenticated and user.is_staff == True:
         try:
             employee = EmployeeInfo.objects.get(id=user.id)
-            flag = 0
-        except ObjectDoesNotExist:
-            flag = 1
-        if flag == 0:
             return render(request,'edashboard.html',{'title':title,'employee':employee})
-        elif flag == 1:
+        except ObjectDoesNotExist:
             messages.error(request,'Complete Profile First')
             return redirect(eupdate)
     else:
@@ -197,3 +215,287 @@ def activate(request, uidb64, token):
         return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
     else:
         return HttpResponse('Activation link is invalid!')
+
+def post(request, id, slug):
+	try:
+		post = Post.objects.get(pk=id, slug=slug)
+	except:
+		raise Http404("Post Does Not Exist")	
+
+	post.read+=1
+	post.save()
+
+	if request.method == 'POST':
+		comm = request.POST.get('comm')
+		comm_id = request.POST.get('comm_id') #None
+
+		if comm_id:
+			SubComment(post=post,
+					user = request.user,
+					comm = comm,
+					comment = Comment.objects.get(id=int(comm_id))
+				).save()
+		else:
+			Comment(post=post, user=request.user, comm=comm).save()
+
+
+	comments = []
+	for c in Comment.objects.filter(post=post):
+		comments.append([c, SubComment.objects.filter(comment=c)])
+	
+	post_author = post.auther
+
+	parms = {
+		'comments':comments,
+		'post_author':post_author,
+		'post':post,
+		'pop_post': Post.objects.order_by('-read')[:2],
+		}
+	return render(request, 'blog-single.html', parms)
+
+def create_blog(request):
+    headtitle = "KOWI Fashions | Create Blogs"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                auther = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            if request.method == 'POST' and request.FILES['myfile']:
+                myfile = request.FILES['myfile']
+                fs = FileSystemStorage()
+                thumbnail = fs.save(myfile.name, myfile)
+                title = request.POST['title']
+                overview = request.POST['overview']
+                slug = request.POST['slug']
+                body_text = request.POST['body_text']
+                publish = request.POST['publish']
+                Post.objects.create(title=title,overview=overview,slug=slug,body_text=body_text,auther=auther,thumbnail=thumbnail,publish=publish)
+            parms = {
+                'headtitle':headtitle,
+                'employee':employee,
+            }
+            return render(request,'createblog.html',parms)
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    return render(request,'createblog.html',{'title':title})
+
+def manageblog(request):
+    title = "KOWI FASHIONS | MANAGE BLOGS"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            posts = Post.objects.filter(auther=author)
+            parms = {
+                'title':title,
+                'posts':posts,
+            }
+            return render(request,'manageblog.html',parms)
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'title':title,
+    }
+    return render(request,'manageblog.html',parms)
+
+def editblog(request,id):
+    headtitle = "KOWI FASHIONS | EDIT BLOG"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            try:
+                old = Post.objects.get(id=id)
+            except ObjectDoesNotExist:
+                return HttpResponse('Blog Not Found')
+            if request.method == 'POST' and request.FILES['myfile']:
+                myfile = request.FILES['myfile']
+                fs = FileSystemStorage()
+                thumbnail = fs.save(myfile.name, myfile)
+                title = request.POST['title']
+                overview = request.POST['overview']
+                slug = request.POST['slug']
+                body_text = request.POST['body_text']
+                publish = request.POST['publish']
+                Post(id=old.id,title=title,overview=overview,slug=slug,body_text=body_text,auther=author,thumbnail=thumbnail,publish=publish,time_upload=datetime.datetime.now()).save()
+                messages.success(request,"Blog Updated!")
+            parms = {
+                'headtitle':headtitle,
+                'old':old,
+                'employee':employee,
+            }
+            return render(request,'editblog.html',parms)
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'headtitle':headtitle,
+    }
+    return render(request,'editblog.html',parms)
+
+def deleteblog(request,id):
+    title = "KOWI FASHIONS | DELETE BLOG"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            post = Post.objects.filter(id=id).delete()
+            return HttpResponse("Blog Deleted Successfully!")
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'title':title,
+    }
+    return render(request,'deleteblog.html',parms)
+
+def handlecomments(request,id):
+    title = "KOWI FASHIONS | HANDLE COMMENTS"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            comments = []
+            try:
+                post = Post.objects.get(pk=id)
+            except:
+                raise Http404("Post Does Not Exist")
+            for c in Comment.objects.filter(post=post):
+                comments.append([c, SubComment.objects.filter(comment=c)])
+            parms = {
+                'title':title,
+                'comments':comments,
+                'id':id,
+            }
+            return render(request,'handlecomments.html',parms)
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'title':title,
+    }
+    return render(request,'handlecomments.html',parms)
+
+def deletecomment(request,id,cm):
+    title = "KOWI FASHIONS | DELETE COMMENT"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            comments = []
+            try:
+                post = Post.objects.get(pk=id)
+            except:
+                raise Http404("Post Does Not Exist")
+            for c in Comment.objects.filter(post=post):
+                comments.append([c, SubComment.objects.filter(comment=c)])
+            cum = Comment.objects.filter(comm=cm).delete()
+            return HttpResponse("Comment is Deleted!")
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'title':title,
+    }
+    return render(request,'deletecomment.html',parms)
+
+def deletesubcomment(request,id,cm,subc):
+    title = "KOWI FASHIONS | DELETE SUB COMMENT"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            flag = 0
+        except ObjectDoesNotExist:
+            flag = 1
+        if flag == 0:
+            try:
+                author = Author.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return HttpResponse('Ask the Admin to become a Author First!')
+            comments = []
+            try:
+                post = Post.objects.get(pk=id)
+            except:
+                raise Http404("Post Does Not Exist")
+            for c in Comment.objects.filter(post=post):
+                comments.append([c, SubComment.objects.filter(comment=c)])
+            cum = SubComment.objects.filter(comm=subc).delete()
+            return HttpResponse("Sub Comment is Deleted!")
+        elif flag == 1:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    parms = {
+        'title':title,
+    }
+    return render(request,'deletesubcomment.html',parms)

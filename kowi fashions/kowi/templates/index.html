@@ -31,7 +31,7 @@
 <div class="col-lg-4 col-md-6" style="padding: 20px!important">
         <div class="movie_col ">
             <div class="card">
-                <img class="card-img-top" style="height: 15rem!important" src="{{item.image}}">
+                <img class="card-img-top" style="height: 15rem!important" src="media/{{item.image}}">
                 <div class="card-body">
                     <h5 class="card-title">{{item.name}}</h5>
                 </div>
@@ -64,6 +64,42 @@
 <a class="btn" href="register">Sign Up</a>
 {%endif%}
 
-
+       {% for post in posts|slice:":5" %}
+                <a href="{% url 'post' post.id post.slug %}"><img src="{{post.thumbnail.url}}" alt=""></a>
+                  <h2><a href="{% url 'post' post.id post.slug %}"></a>{{ post.title }}</h2>
+                  <span class="subheading">Overview - {{post.overview}}</span>
+               {% for cat in post.categories.all %}
+                   <a href="#">{{cat.title}}</a>, 
+                 {% endfor %}
+                    <p class="mb-0"><a href="#">{{post.time_upload}}</a> | <a href="#">{{post.read}} reads</a></p> 
+          {% endfor %}
+          <h2><b>Editor Picks</b></h2>
+          <br>
+            {% for author_posts in author_post %}
+                  <a href="" class="img w-100 mb-3 mb-md-0" style="background-image: url('{{author_posts.thumbnail.url}}');"></a>
+                    <h2><a href=""></a>{{author_posts.title}}</h2>
+                    <span class="subheading">{{author_posts.overview}}</span>
+                    {% for cats in author_posts.categories.all %}
+                    <a href="#">{{cats.title}}</a>, 
+                  {% endfor %}
+                      <p class="mb-0"><a href="#">{{author_posts.time_upload|timesince}} ago</a> | <b>Author :</b> {{author_posts.auther.user.username}} </p> 
+                {%endfor%}
+                <ul class="pagination">
+                  {% if posts.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{posts.previous_page_number}}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  <li class="page-item"><a class="page-link" href="#">{{posts.number}}</a></li>
+                  {% if posts.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{posts.next_page_number}}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
 </body>
 </html>

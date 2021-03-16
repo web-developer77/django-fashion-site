@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{headtitle}}</title>
+    <script src="//cdn.ckeditor.com/4.16.0/full/ckeditor.js"></script>
+</head>
+<body>
+    <div>
+        {% if messages %}
+        {% for message in messages %}
+          <script>M.toast({html: "{{message}}", classes: 'blue rounded', displayLength:2000});</script>
+        {% endfor %}
+        {%else%}
+        <p>No messages</p>
+        {% endif %}
+    </div>
+    <h2>User ID: {{employee.id}}</h2>
+    <h3>Gender: {{employee.gender}}</h3>
+    <h3>Mobile Number: {{employee.mobno}}</h3>
+    <h3>Age: {{employee.age}}</h3>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        {%csrf_token%}
+        <input type="text" name="title" id="" value="{{old.title}}">
+        <input type="text" name="overview" value="{{old.overview}}">
+        <input type="text" name="slug" value="{{old.slug}}">
+        <textarea name="body_text" id="body_text" cols="30" rows="10">{{old.body_text}}</textarea>
+        <input name="myfile" type="file" id="myfile" value="{{old.thumbnail.url}}" required>
+        <select name="publish" id="">
+            <option value="True">True</option>
+            <option value="False">False</option>
+        </select>
+        <input type="submit" value="SUBMIT">
+        <script>
+            CKEDITOR.replace( 'body_text', {
+                extraPlugins: 'editorplaceholder',
+                editorplaceholder: 'Open Your Blog and Directly Copy Paste Contents in the Editor then do the edits...'
+            });
+        </script>
+    </form>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+</head>
+<body>
+        <h2>Comments</h2>
+      <ul class="comment-list">
+        {% for cm in comments %}
+        <li class="comment">
+          <div class="vcard bio">
+            <img src="" alt="Image placeholder">
+          </div>
+          <div class="comment-body">
+            <h3>{{cm.0.user.username}}</h3>
+            <div class="meta">{{cm.0.time}}</div>
+            <p>{{cm.0.comm}}</p>
+            <div>
+                <a href="{% url 'deletecomment' id cm.0.comm %}">Delete This Comment!</a>
+            </div>
+          </div>
+
+          <ul class="children">
+            {% for subc in cm.1 %}
+            <li class="comment">
+              <div class="vcard bio">
+                <img src="" alt="Image placeholder">
+              </div>
+              <div class="comment-body">
+                <h3>{{subc.user.username}}</h3>
+                <div class="meta">{{subc.time}}</div>
+                <p>{{subc.comm}}</p>
+              </div>
+              <div>
+                  <a href="{% url 'deletesubcomment' id cm subc.comm %}">Delete This Sub Comment!</a>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}        
+      </ul>
+</body>
+</html>
