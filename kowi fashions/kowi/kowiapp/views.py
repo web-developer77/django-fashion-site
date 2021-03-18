@@ -499,3 +499,7 @@ def deletesubcomment(request,id,cm,subc):
         'title':title,
     }
     return render(request,'deletesubcomment.html',parms)
+
+
+def chat_system(request):
+    return render(request,'chat.html')

@@ -44,6 +44,7 @@ urlpatterns = [
     path('handlecomments/<int:id>/',handlecomments,name="handlecomments"),
     path('deletecomment/<int:id>/<cm>/',deletecomment,name="deletecomment"),
     path('deletesubcomment/<int:id>/<cm>/<subc>/',deletesubcomment,name="deletesubcomment"),
+    path('chat/',chat_system,name="chat_system"),
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
