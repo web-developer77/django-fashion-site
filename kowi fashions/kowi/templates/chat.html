@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
+<head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat System</title>
+    <title>{{title}}</title>
 </head>
 <body>
-    <h1>This is the dashboard of chat system</h1>
-    <p>Welcome!</p>
-     <iframe src="https://dashboard.tawk.to/#/dashboard/6051a205f7ce18270930e606" style="height:1100px;width:1250px;" title="Iframe Example"></iframe> 
+    <div>
+        {% if messages %}
+        {% for message in messages %}
+          <script>M.toast({html: "{{message}}", classes: 'blue rounded', displayLength:2000});</script>
+        {% endfor %}
+        {%else%}
+        <p>No messages</p>
+        {% endif %}
+    </div>
+    <h2>Employee ID: {{employee.id}}</h2>
+    <h3>Welcome To The Chat System!</h3>
+    <iframe src="https://dashboard.tawk.to/#/dashboard/6051a205f7ce18270930e606" style="height:1100px;width:1250px;" title="Chat System"></iframe> 
 </body>
 </html>

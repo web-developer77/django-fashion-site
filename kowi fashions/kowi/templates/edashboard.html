@@ -16,11 +16,12 @@
         <p>No messages</p>
         {% endif %}
     </div>
-    <h2>User ID: {{employee.id}}</h2>
+    <h2>Employee ID: {{employee.id}}</h2>
     <h3>Gender: {{employee.gender}}</h3>
     <h3>Mobile Number: {{employee.mobno}}</h3>
     <h3>Age: {{employee.age}}</h3>
     <a href="{% url 'create_blog' %}">Add a Blog!</a>
     <a href="{% url 'manageblog' %}">Manage Blogs!</a>
+    <a href="{% url 'chat_system' %}">Chat With Users!</a>
 </body>
 </html>

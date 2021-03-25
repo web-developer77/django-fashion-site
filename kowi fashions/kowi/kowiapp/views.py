@@ -17,6 +17,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
+import requests,json
+
 def index(request):
     trend = trends.objects.all()
     user = request.user
@@ -36,6 +38,7 @@ def index(request):
             feed = request.POST['feed']
             feedback(userid=user.id,feed=feed).save()
             messages.info(request,"Feedback Sent")
+    
 
     parms = {
 		'posts': posts,
@@ -502,4 +505,16 @@ def deletesubcomment(request,id,cm,subc):
 
 
 def chat_system(request):
-    return render(request,'chat.html')
+    title = "KOWI Fashions | Employee Chat System"
+    user = request.user
+    if user.is_authenticated and user.is_staff == True:
+        try:
+            employee = EmployeeInfo.objects.get(id=user.id)
+            return render(request,'chat.html',{'title':title,'employee':employee})
+        except ObjectDoesNotExist:
+            messages.error(request,'Complete Profile First')
+            return redirect(eupdate)
+    else:
+        messages.error(request,'Login First')
+        return redirect('elogin')
+    return render(request,'chat.html',{'title':title})

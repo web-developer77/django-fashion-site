@@ -26,7 +26,6 @@
         {% endif %}
     </div>
 <!-- Card -->
-
 {% for item in trend %}
 <div class="col-lg-4 col-md-6" style="padding: 20px!important">
         <div class="movie_col ">
@@ -101,8 +100,39 @@
                   </li>
                   {% endif %}
                 </ul>
+<div>
+  <h1>Let's trace Your Location</h1>
+  <button onclick="getLocation()">Get Location</button>
+</div>
+<div id="output">
 
+</div>
                 <!--Start of Tawk.to Script-->
+                <script
+                src="https://code.jquery.com/jquery-3.6.0.js"
+                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+                crossorigin="anonymous"></script>
+<script>
+  var x = document.getElementById('output');
+  function getLocation() {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+
+    }
+    else {
+      x.innerHTML = "Browser Not Supporting";
+    }
+  }
+  function showPosition(position)
+  {
+    x.innerHTML = "Latitude = "+position.coords.latitude;
+    x.innerHTML+= " <br>"
+    x.innerHTML+= "Longitude = "+position.coords.longitude;
+
+    var locAPI = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude+","+position.coords.longitude+"&sensor=true";
+    x.innerHTML+=locAPI;
+  }
+</script>        
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
