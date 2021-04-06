@@ -125,12 +125,20 @@
   }
   function showPosition(position)
   {
-    x.innerHTML = "Latitude = "+position.coords.latitude;
-    x.innerHTML+= " <br>"
-    x.innerHTML+= "Longitude = "+position.coords.longitude;
+    //x.innerHTML = "Latitude = "+position.coords.latitude;
+    //x.innerHTML+= " <br>"
+    //x.innerHTML+= "Longitude = "+position.coords.longitude;
 
-    var locAPI = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude+","+position.coords.longitude+"&sensor=true";
-    x.innerHTML+=locAPI;
+    var locAPI = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude+","+position.coords.longitude+"&sensor=true&key=AIzaSyAfGyx7ZqkhOa3-MV7KkJPCUqVI67am_qM";
+    $.get({
+      url: locAPI,
+      success: function(data) {
+        console.log(data);
+        x.innerHTML = data.results[0].address_components[5].long_name+", ";
+        x.innerHTML += data.results[0].address_components[6].long_name+", ";
+        x.innerHTML += data.results[0].address_components[7].long_name;
+      }
+    });
   }
 </script>        
 <script type="text/javascript">
