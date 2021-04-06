@@ -1,0 +1,8 @@
+Django
+django-allauth
+django-ckeditor
+django-crispy-forms
+django-js-asset
+Pillow
+requests
+requests-oauthlib
