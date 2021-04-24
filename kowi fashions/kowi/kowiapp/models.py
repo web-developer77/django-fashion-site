@@ -54,8 +54,10 @@ class CustInfo(models.Model):
     height = models.CharField(max_length=75)
     weight = models.CharField(max_length=75)
     haircolors = models.CharField(choices=hair,max_length=50)
-    mobno = models.IntegerField()
-    age = models.IntegerField()
+    mobno = models.IntegerField(blank=True,null=True)
+    age = models.IntegerField(blank=True,null=True)
+    lat = models.DecimalField(max_digits = 9, decimal_places = 6,blank=True,null=True)
+    lng = models.DecimalField(max_digits = 9, decimal_places = 6,blank=True,null=True)
 
     def __str__(self):
         us = User.objects.get(id=self.id)
@@ -67,8 +69,10 @@ class CustInfo(models.Model):
 class EmployeeInfo(models.Model):
     id = models.IntegerField(primary_key=True)
     gender = models.CharField(choices=gen,max_length=50)
-    mobno = models.IntegerField()
-    age = models.IntegerField()
+    mobno = models.IntegerField(blank=True,null=True)
+    age = models.IntegerField(blank=True,null=True)
+    lat = models.DecimalField(max_digits = 9, decimal_places = 6,blank=True,null=True)
+    lng = models.DecimalField(max_digits = 9, decimal_places = 6,blank=True,null=True)
 
     def __str__(self):
         us = User.objects.get(id=self.id)

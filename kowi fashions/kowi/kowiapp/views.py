@@ -18,6 +18,8 @@ from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 import requests,json
+from geopy.geocoders import Nominatim
+from decimal import *
 
 def index(request):
     trend = trends.objects.all()
@@ -26,6 +28,50 @@ def index(request):
     AuthorsPost = [Post.objects.filter(auther = author).first() for author in TopAuthors]
     all_post = Paginator(Post.objects.filter(publish = True),3)
     page = request.GET.get('page')
+    lat=''
+    lng=''
+    flag=1
+    nearby = []
+    if request.method=='POST':
+        address = request.POST['add']
+        geolocator = Nominatim(user_agent="Kowi")
+        location = geolocator.geocode(address)
+        if location == None:
+            flag=1
+            messages.error(request,"Enter Correct Address")
+        else:
+            flag=0
+            lat = location.latitude
+            lng = location.longitude
+            Decimal(lat)
+            Decimal(lng)
+            if user.is_authenticated and user.is_staff == False:
+                try:
+                    customer = CustInfo.objects.get(id=user.id)
+                    CustInfo(id=user.id,gender=customer.gender,skintone=customer.skintone,height=customer.height,weight=customer.weight,haircolors=customer.haircolors,mobno=customer.mobno,age=customer.age,lat=lat,lng=lng).save()
+                except ObjectDoesNotExist:
+                    CustInfo(id=user.id,lat=lat,lng=lng).save()
+
+                employees = EmployeeInfo.objects.all()
+                cust = CustInfo.objects.get(id=user.id)
+                for employee in employees:
+                    latemp = employee.lat
+                    lngemp = employee.lng
+                    latc = cust.lat
+                    lngc = cust.lng
+                    distance = dist(latemp,lngemp,latc,lngc)
+                    if distance <= 100:
+                        nearby.append(employee)
+                    
+            elif user.is_authenticated and user.is_staff == True:
+                try:
+                    employee = EmployeeInfo.objects.get(id=user.id)
+                    EmployeeInfo(id=user.id,gender=employee.gender,mobno=employee.mobno,age=employee.age,lat=lat,lng=lng).save()
+                except ObjectDoesNotExist:
+                    EmployeeInfo(id=user.id,lat=lat,lng=lng).save()
+            else:
+                messages.error(request,'Login First')
+
     try:
         posts = all_post.page(page)
     except PageNotAnInteger:
@@ -33,18 +79,21 @@ def index(request):
     except EmptyPage:
         posts = all_post.page(all_post.num_pages)
 
-    if user.is_authenticated:
-        if request.method == 'POST':
-            feed = request.POST['feed']
-            feedback(userid=user.id,feed=feed).save()
-            messages.info(request,"Feedback Sent")
+    #if user.is_authenticated:
+    #    if request.method == 'POST':
+     #       feed = request.POST['feed']
+      #      feedback(userid=user.id,feed=feed).save()
+       #     messages.info(request,"Feedback Sent")
     
-
     parms = {
 		'posts': posts,
         'author_post':AuthorsPost,
         'title':'index',
         'trend':trend,
+        'lat':lat,
+        'lng':lng,
+        'flag':flag,
+        'nearby':nearby,
 	}
     return render(request, 'index.html', parms)
 
@@ -55,7 +104,10 @@ def edashboard(request):
     if user.is_authenticated and user.is_staff == True:
         try:
             employee = EmployeeInfo.objects.get(id=user.id)
-            return render(request,'edashboard.html',{'title':title,'employee':employee})
+            geolocator = Nominatim(user_agent="Kowi")
+            indent = str(employee.lat)+","+str(employee.lng)
+            location = geolocator.reverse(indent)
+            return render(request,'edashboard.html',{'title':title,'employee':employee,'location':location})
         except ObjectDoesNotExist:
             messages.error(request,'Complete Profile First')
             return redirect(eupdate)
@@ -108,7 +160,10 @@ def dashboard(request):
         except ObjectDoesNotExist:
             flag = 1
         if flag == 0:
-            return render(request,'dashboard.html',{'title':title,'customer':customer})
+            geolocator = Nominatim(user_agent="Kowi")
+            indent = str(customer.lat)+","+str(customer.lng)
+            location = geolocator.reverse(indent)
+            return render(request,'dashboard.html',{'title':title,'customer':customer,'location':location})
         elif flag == 1:
             messages.error(request,'Complete Profile First!')
             return redirect(update)
@@ -518,3 +573,20 @@ def chat_system(request):
         messages.error(request,'Login First')
         return redirect('elogin')
     return render(request,'chat.html',{'title':title})
+
+
+from math import radians, cos, sin, asin, sqrt
+def dist(lat1, long1, lat2, long2):
+    """
+Replicating the same formula as mentioned in Wiki
+    """
+    # convert decimal degrees to radians 
+    lat1, long1, lat2, long2 = map(radians, [lat1, long1, lat2, long2])
+    # haversine formula 
+    dlon = long2 - long1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    # Radius of earth in kilometers is 6371
+    km = 6371* c
+    return km

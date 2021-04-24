@@ -9,21 +9,7 @@
 </head>
 <body>
   <div>
-    {% if messages %}
-    {% for message in messages %}
-        {% if message.tags == 'success'%}
-            <script>M.toast({html: "{{message}}", classes: 'green rounded', displayLength:2000});</script>
-        {% elif message.tags == 'info'%}
-            <script>M.toast({html: "{{message}}", classes: 'blue rounded', displayLength:2000});</script>
-        {% elif message.tags == 'warning'%}
-            <script>M.toast({html: "{{message}}", classes: 'orange rounded', displayLength:10000});</script>
-        {% elif message.tags == 'error'%}
-            <script>M.toast({html: "{{message}}", classes: 'red rounded', displayLength:10000});</script>
-        {% endif %}
-    {% endfor %}
-        {%else%}
-        <p>No messages</p>
-        {% endif %}
+    {% include 'messages.html' %}
     </div>
 <!-- Card -->
 {% for item in trend %}
@@ -102,9 +88,30 @@
                 </ul>
 <div>
   <h1>Let's trace Your Location</h1>
-  <button onclick="getLocation()">Get Location</button>
+    <button onclick="getLocation()" type="submit">Get Location</button>
 </div>
-<div id="output">
+<div>
+  <p id="output"></p>
+</div>
+<form action="" method="post">
+  {%csrf_token%}
+  <input id="sexy" type="search" name="add" placeholder="Enter Your Address">
+  <input type="submit" value="Submit">
+</form>
+<div>
+  {%if flag == 0 %}
+  <p>
+    Latitude: {{lat}}
+    <br>
+    Longitude: {{lng}}
+  </p>
+  {%endif%}
+</div>
+<div>
+  Nearby:
+  {%for near in nearby%}
+  {{near.id}}
+  {%endfor%}
 
 </div>
                 <!--Start of Tawk.to Script-->
@@ -114,6 +121,7 @@
                 crossorigin="anonymous"></script>
 <script>
   var x = document.getElementById('output');
+  var y = document.getElementById('sexy');
   function getLocation() {
     if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(showPosition);
@@ -121,6 +129,7 @@
     }
     else {
       x.innerHTML = "Browser Not Supporting";
+      y.value = x.textContent;
     }
   }
   function showPosition(position)
@@ -134,9 +143,8 @@
       url: locAPI,
       success: function(data) {
         console.log(data);
-        x.innerHTML = data.results[0].address_components[5].long_name+", ";
-        x.innerHTML += data.results[0].address_components[6].long_name+", ";
-        x.innerHTML += data.results[0].address_components[7].long_name;
+        x.innerHTML = data.results[0].address_components[1].long_name+','+data.results[0].address_components[2].long_name;
+        y.value = x.textContent;
       }
     });
   }
